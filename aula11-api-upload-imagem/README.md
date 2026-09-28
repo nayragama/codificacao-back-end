@@ -17,5 +17,3 @@ Nesta aula, desenvolvi uma API de upload de imagens usando NestJS.
 - TypeScript
 - Multer
 - UUID
-
-Com
