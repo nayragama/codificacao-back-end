@@ -11,5 +11,3 @@ Nesta aula, desenvolvi uma API com NestJS para praticar o recebimento de dados d
 - Registrei os controllers no módulo da aplicação.
 
 Com essa atividade, pratiquei o uso de headers, códigos de status HTTP e respostas em JSON no NestJS.
-
-> A chave escrita diretamente no código foi usada apenas para o exercício. Em uma aplicação real, ela precisaria ser armazenada de forma segura.
