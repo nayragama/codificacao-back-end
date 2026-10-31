@@ -1,0 +1,16 @@
+{
+  "autor": "jhemilly Kauanny",
+  "texto": "sem texto",
+  "data": "2026-10-20",
+  "curtidas": ["Ana", "Carlos"],
+  "comentarios": [
+    {
+      "autor": "Ana",
+      "texto": "Muito bom!."
+    },
+    {
+      "autor": "Carlos",
+      "texto": "Parabéns pelo progresso!"
+    }
+  ]
+}
