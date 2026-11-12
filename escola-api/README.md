@@ -1,60 +1,106 @@
-# API de Alunos
+# Escola API
 
-API desenvolvida com NestJS e MongoDB para cadastrar e gerenciar alunos. O projeto permite criar, listar, consultar por ID, atualizar e remover registros.
+API REST para cadastro e gerenciamento de alunos, desenvolvida com **NestJS**, **TypeScript**, **MongoDB** e **Mongoose**. O projeto permite criar, listar, consultar, atualizar e remover alunos, além de praticar paginação, filtros, ordenação e documentação de rotas com Swagger.
 
-## O que foi desenvolvido
+## Funcionalidades
 
-Organizei os arquivos do projeto para separar as responsabilidades da API:
+- Cadastrar alunos com nome, idade, matrícula e cursos.
+- Listar alunos com paginação.
+- Filtrar a listagem por nome e curso.
+- Ordenar os resultados por campo e direção.
+- Consultar um aluno pelo ID.
+- Atualizar os dados de um aluno.
+- Remover um aluno.
+- Impedir matrículas duplicadas por meio de um índice único no MongoDB.
 
-- **Schema:** define como os dados do aluno são armazenados no MongoDB.
-- **DTO:** define as regras de validação dos dados recebidos.
-- **Service:** contém as operações de cadastro, consulta, atualização e remoção.
-
-O schema de aluno contém `nome`, `idade`, `matricula` e `cursos`. Nome, idade e matrícula são campos obrigatórios; a matrícula foi definida como única. O campo `cursos` armazena uma lista de textos.
-
-No `AlunosService`, implementei as operações de criação, listagem de todos os alunos, busca por ID, atualização e exclusão. Nas operações por ID, utilizei `NotFoundException` para informar quando o aluno não é encontrado.
-
-Criei o `CreateAlunoDto` com regras do `class-validator`. O nome e a matrícula devem ser textos e não podem estar vazios; a idade deve ser um número inteiro maior ou igual a zero; e a lista de cursos deve conter pelo menos um item, sendo cada curso um texto.
-
-No `main.ts`, configurei o `ValidationPipe` global com `whitelist`, `forbidNonWhitelisted` e `transform` para aplicar as regras dos DTOs às requisições.
-
-## Como executar
-
-É necessário ter o Node.js instalado e uma conexão com o MongoDB configurada no projeto.
-
-1. Abra um terminal na pasta `escola-api`.
-2. Instale as dependências:
-
-   ```bash
-   npm install
-   ```
-
-3. Confira em `src/app.module.ts` se a conexão com o MongoDB está configurada para um banco acessível.
-4. Inicie a API:
-
-   ```bash
-   npm run start:dev
-   ```
-
-A API utiliza a porta `3000` por padrão, conforme a configuração mostrada no `main.ts`.
-
-## Como testar o cadastro
-
-No Postman, crie uma requisição com:
-
-- **Método:** `POST`
-- **URL:** `http://localhost:3000/alunos`
-- **Body:** `raw`, no formato `JSON`
-
-Exemplo de dados válidos:
+## Estrutura de um aluno
 
 ```json
 {
-  "nome": "Ana Silva",
+  "nome": "Ana Clara Souza",
   "idade": 19,
-  "matricula": "A001",
-  "cursos": ["Informática"]
+  "matricula": "4827",
+  "cursos": ["Administração", "Engenharia Civil"]
 }
 ```
 
-Também testei o envio de dados inválidos, como nome vazio, idade negativa, matrícula vazia e lista de cursos sem itens. A API respondeu com `400 Bad Request` e apresentou as mensagens de validação correspondentes. Por fim, conferi no MongoDB Compass os documentos salvos na coleção `alunos`.
+O MongoDB acrescenta um `_id` ao documento salvo. A matrícula deve ser diferente para cada aluno.
+
+## Tecnologias utilizadas
+
+- **NestJS:** estrutura da API e definição das rotas.
+- **TypeScript:** linguagem utilizada no projeto.
+- **MongoDB:** banco de dados que armazena os alunos.
+- **Mongoose:** integração entre a aplicação e o MongoDB.
+- **Swagger:** documentação interativa da API.
+
+## Rotas
+
+| Método | Rota | Descrição |
+| --- | --- | --- |
+| `POST` | `/alunos` | Cadastra um aluno |
+| `GET` | `/alunos` | Lista alunos com paginação e filtros |
+| `GET` | `/alunos/:id` | Consulta um aluno pelo ID |
+| `PATCH` | `/alunos/:id` | Atualiza um aluno |
+| `DELETE` | `/alunos/:id` | Remove um aluno |
+
+## Cadastrar um aluno
+
+Envie uma requisição `POST` para `http://localhost:3000/alunos` com o corpo em formato JSON:
+
+```json
+{
+  "nome": "Ana Clara Souza",
+  "idade": 19,
+  "matricula": "4827",
+  "cursos": ["Administração", "Engenharia Civil"]
+}
+```
+
+Também é possível testar essa operação pelo Swagger ou pelo Insomnia. Ao repetir uma matrícula já cadastrada, o índice único do MongoDB impede a gravação. O tratamento da resposta de erro depende da implementação da API.
+
+## Listar e filtrar alunos
+
+Envie uma requisição `GET` para:
+
+```text
+http://localhost:3000/alunos?page=1&limit=5
+```
+
+Parâmetros da listagem:
+
+| Parâmetro | Função | Exemplo |
+| --- | --- | --- |
+| `page` | Página solicitada | `1` |
+| `limit` | Quantidade de alunos por página | `5` |
+| `nome` | Filtra pelo nome | `Ana` |
+| `curso` | Filtra pelo curso | `Administração` |
+| `orderBy` | Campo usado para ordenar | `nome` |
+| `orderDirection` | Direção da ordenação | `asc` ou `desc` |
+
+Exemplo com filtro e ordenação:
+
+```text
+http://localhost:3000/alunos?page=1&limit=5&nome=Ana&orderBy=nome&orderDirection=asc
+```
+
+A listagem retorna os alunos em `data` e os dados da paginação em `meta`, incluindo `total`, `page`, `limit` e `totalPages`.
+
+> **Atenção:** para a ordenação funcionar, o controller precisa repassar `orderBy` e `orderDirection` ao service, e a consulta do Mongoose precisa aplicar `.sort(sort)`. Confira esses dois pontos na versão atual do código.
+
+## Executar o projeto
+
+Com o MongoDB configurado e as dependências instaladas, execute na pasta `escola-api`:
+
+```bash
+npm install
+npm run start:dev
+```
+
+A API estará disponível em `http://localhost:3000`. Para consultar e testar as rotas pelo Swagger, acesse:
+
+```text
+http://localhost:3000/api
+```
+
+Confira a configuração de conexão com o MongoDB no projeto antes de iniciar a aplicação.
