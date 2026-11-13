@@ -1,6 +1,6 @@
 # Escola API
 
-API REST para cadastro e gerenciamento de alunos, desenvolvida com **NestJS**, **TypeScript**, **MongoDB** e **Mongoose**. O projeto permite criar, listar, consultar, atualizar e remover alunos, além de praticar paginação, filtros, ordenação e documentação de rotas com Swagger.
+API REST para cadastro e gerenciamento de alunos, desenvolvida com **NestJS**, **TypeScript**, **MongoDB** e **Mongoose**. O projeto permite criar, listar, consultar, atualizar e remover alunos, além de utilizar paginação, filtros, ordenação, tratamento de erros e documentação de rotas com Swagger.
 
 ## Funcionalidades
 
@@ -12,6 +12,8 @@ API REST para cadastro e gerenciamento de alunos, desenvolvida com **NestJS**, *
 - Atualizar os dados de um aluno.
 - Remover um aluno.
 - Impedir matrículas duplicadas por meio de um índice único no MongoDB.
+- Retornar uma mensagem específica quando houver tentativa de cadastrar uma matrícula repetida.
+- Retornar erro `404` quando um aluno solicitado pelo ID não for encontrado.
 
 ## Estrutura de um aluno
 
@@ -57,7 +59,17 @@ Envie uma requisição `POST` para `http://localhost:3000/alunos` com o corpo em
 }
 ```
 
-Também é possível testar essa operação pelo Swagger ou pelo Insomnia. Ao repetir uma matrícula já cadastrada, o índice único do MongoDB impede a gravação. O tratamento da resposta de erro depende da implementação da API.
+Também é possível testar essa operação pelo Swagger ou pelo Insomnia. Quando o cadastro é realizado com sucesso, a API retorna o aluno criado.
+
+### Matrícula duplicada
+
+O campo `matricula` possui um índice único no MongoDB. Se já existir um aluno com a matrícula informada, o banco de dados impede a gravação. O serviço identifica esse erro e retorna **409 Conflict**, com a mensagem:
+
+```text
+Já existe um aluno cadastrado com essa matrícula
+```
+
+Para outros erros inesperados durante o cadastro, o serviço retorna um erro interno com a mensagem `Erro ao processar o cadastro do aluno`.
 
 ## Listar e filtrar alunos
 
@@ -84,13 +96,27 @@ Exemplo com filtro e ordenação:
 http://localhost:3000/alunos?page=1&limit=5&nome=Ana&orderBy=nome&orderDirection=asc
 ```
 
-A listagem retorna os alunos em `data` e os dados da paginação em `meta`, incluindo `total`, `page`, `limit` e `totalPages`.
+A listagem retorna os alunos em `data` e os dados da paginação em `meta`, incluindo `total`, `page`, `limit` e `totalPages`. O total considera os filtros utilizados na consulta.
 
-> **Atenção:** para a ordenação funcionar, o controller precisa repassar `orderBy` e `orderDirection` ao service, e a consulta do Mongoose precisa aplicar `.sort(sort)`. Confira esses dois pontos na versão atual do código.
+> Para a ordenação funcionar, o controller deve enviar `orderBy` e `orderDirection` ao service. No service mostrado nas fotos, a consulta já aplica `.sort(sort)`.
+
+## Consultar, atualizar e remover alunos
+
+Para trabalhar com um aluno específico, utilize o `_id` gerado pelo MongoDB na rota `/alunos/:id`. Por exemplo:
+
+```text
+http://localhost:3000/alunos/SEU_ID_AQUI
+```
+
+- **GET:** retorna os dados do aluno.
+- **PATCH:** atualiza as informações enviadas no corpo da requisição.
+- **DELETE:** remove o aluno.
+
+Nas três operações, se nenhum aluno for encontrado para o ID informado, a API retorna **404 Not Found**.
 
 ## Executar o projeto
 
-Com o MongoDB configurado e as dependências instaladas, execute na pasta `escola-api`:
+Com o MongoDB configurado, abra o terminal na pasta `escola-api` e execute:
 
 ```bash
 npm install
@@ -102,5 +128,3 @@ A API estará disponível em `http://localhost:3000`. Para consultar e testar as
 ```text
 http://localhost:3000/api
 ```
-
-Confira a configuração de conexão com o MongoDB no projeto antes de iniciar a aplicação.
