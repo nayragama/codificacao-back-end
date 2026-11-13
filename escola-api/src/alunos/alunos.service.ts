@@ -24,7 +24,7 @@ export class AlunosService {
             if(
                 error instanceof MongoServerError 
                 && 
-                error.code == 1100
+                error.code == 11000
             ){
                 throw new ConflictException('Já existe um aluno cadastrado com essa matricula');
             }
