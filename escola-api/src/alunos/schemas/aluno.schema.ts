@@ -21,7 +21,7 @@ export class Aluno {
     })
     matricula:string;
 
-    @Prop([String])
+    @Prop({String})
     cursos:string[];
     
     @Prop({
